@@ -24,5 +24,5 @@ decade and find Stephen Curry and Russell Westbrook as having the greatest
 
 ## Shiny Application
 
-The (EPAA Shiny application)[https://ryan-elmore.shinyapps.io/NBA-APAA/] 
+The [EPAA Shiny application](https://ryan-elmore.shinyapps.io/NBA-APAA/)
 supports additional analysis. 
