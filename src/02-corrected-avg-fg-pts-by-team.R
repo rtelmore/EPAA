@@ -1,6 +1,5 @@
 ## Ryan Elmore
 ## Team rankings for 2021 (10 x 10)
-## 31 Oct 2021
 
 library(dplyr)
 library(ggplot2)
@@ -8,7 +7,7 @@ library(tidyr)
 library(ggridges)
 library(forcats)
 
-source("ryan-ad-hoc/04-prediction-functions.R")
+source("99-prediction-functions.R")
 
 df <- readRDS("data/nba-zone-combined-team-w-fts.rds") %>% 
   tidyr::separate(., team_season, into = c("team", "season"), sep = "_") 
@@ -30,20 +29,13 @@ shots <- df_avg_team_by_year %>%
   round()
 apply(df_avg_team_by_year[, -1] |> 
         dplyr::select(dplyr::ends_with("_n")) , 1, sum)
-# makes <- df_avg_team_by_year %>%
-#   dplyr::filter(., season == 2021) %>%
-#   dplyr::select(., dplyr::ends_with("_m")) %>%
-#   round()
-
-#w <- readRDS("data/teams/w_pp_10_10_5_04122021.rds")
 
 teams <- df |> 
   dplyr::filter(season == 2021) |> 
   dplyr::distinct(team) |> 
   dplyr::pull()
 teams <- c(teams, "Average")
-# avg_above_by_team <- function(teams, dimension = 10, alpha = 5, 
-#                               year = 2021, seed = 19823){
+
 set.seed(19892)
 alpha <- 5
 dimension <- 10
@@ -97,11 +89,11 @@ for(i in seq_along(teams)){
   
 }
   
-new_string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
-saveRDS(results, paste("data/avg_team/avg_fg_pts_team_8K_", new_string, "_", 2021, 
-                       "_", format(Sys.Date(), "%d%m%Y"), ".rds", sep = ""))
+# new_string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
+# saveRDS(results, paste("data/avg_team/avg_fg_pts_team_8K_", new_string, "_", 2021, 
+#                        "_", format(Sys.Date(), "%d%m%Y"), ".rds", sep = ""))
 
-results <- readRDS("data/avg_team/avg_fg_pts_team_8K_10_10_5_2021_08112022.rds") |> 
+results <- results |> 
   dplyr::mutate(iter = rep(1:10000, times = 31)) |> 
   dplyr::filter(iter > 3000, team != "Average")
 
@@ -117,4 +109,3 @@ p_comp + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   labs(y = "", 
        x = "expected points per game") +
   theme_light()
-ggsave("doc/fig/fg_pts_above_avg_team_8K_10_10_5_2021_h.png", hei = 10, wid = 8)

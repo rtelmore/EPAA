@@ -1,6 +1,5 @@
 ## Ryan Elmore
 ## Summary stats for paper
-## 13 Feb 2023
 
 library(dplyr)
 library(tidyr)
@@ -86,7 +85,7 @@ legend <- cowplot::get_legend(
 
 p_final <- cowplot::plot_grid(prow, legend, nrow = 2, rel_heights = c(1, .1))
 p_final
-cowplot::save_plot("doc/fig/eda-cowplot.png", p_final, 
+cowplot::save_plot("eda-cowplot.png", p_final, 
                    base_height = 10, base_width = 8)
 
 ## App figure
@@ -191,5 +190,3 @@ p + geom_point() +
        y = "Number of Shots Taken",
        col = "Region:") +
   scale_color_brewer(palette = "Paired")
-
-saveRDS(df_summary, "app/NBA-apaa/summary-shots-for-app.rds")

@@ -21,7 +21,6 @@ bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 10, n_w = 10,
   ## 5. z (product of binomials)
   ## 6. w (multinomial)
   
-  
   location_prob <- df_shots %>% 
     dplyr::select(c(team_season, dplyr::ends_with("_n"))) %>% 
     dplyr::mutate(., n = rowSums(select_if(., is.numeric))) %>% 
