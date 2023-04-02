@@ -1,5 +1,4 @@
 ## Ryan Elmore
-## 1 Nov 2022
 ## Pts above/below average
 
 library(dplyr)
@@ -9,13 +8,11 @@ library(ggridges)
 library(forcats)
 library(ggrepel)
 
-#source("ryan-ad-hoc/04-prediction-functions.R")
-
 ## Teams
 df_tmp <- readRDS("data/nba-zone-combined-team-w-fts.rds") |> 
   tidyr::separate(team_season, into = c("team", "season"), sep = "_") 
 
-df_nba <- readRDS("data/all-shots-29Sep21.rds") 
+df_nba <- readRDS("data/all-shots.rds") 
 shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |> 
   na.omit()
 
@@ -25,15 +22,16 @@ K <- 7
 
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 
-w <- readRDS(paste("data/teams/w_pp_", string, "_04122021.rds", sep = ""))
-z <- readRDS(paste("data/teams/z_pp_", string, "_04122021.rds", sep = ""))
-p <- readRDS(paste("data/teams/p_", string, "_04122021.rds", sep = ""))
-q <- readRDS(paste("data/teams/q_", string, "_04122021.rds", sep = ""))
+## Read in the w, z, p, and q data
+w <- readRDS("path_to_team_data")
+z <- readRDS("path_to_team_data")
+p <- readRDS("path_to_team_data")
+q <- readRDS("path_to_team_data")
 
-w_p <- readRDS("data/players/w_pp_10_10_5_02112022.rds")
-z_p <- readRDS("data/players/z_pp_10_10_5_02112022.rds")
-p_p <- readRDS("data/players/p_10_10_5_02112022.rds")
-q_p <- readRDS("data/players/q_10_10_5_02112022.rds")
+w_p <- readRDS("path_to_player_data")
+z_p <- readRDS("path_to_player_data")
+p_p <- readRDS("path_to_player_data")
+q_p <- readRDS("path_to_player_data")
 
 season_sim = 2021
 
@@ -141,50 +139,12 @@ for(i in seq_along(df$player)){
 
 saveRDS(results, paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 
-# N <- 8000
-# total <- numeric(B)
-#   
-# for (b in 1:B) {
-#   index <- which(df_tmp$team == sample(teams_data, size = 1) & df_tmp$season == 2021)
-#   if(b %% 5000 == 0){
-#     cat(sprintf("Iteration %s at %s \n", b, Sys.time()))
-#   }
-#   Z_pp <- z[[b]][index, ]
-#   W_pp <- w[[b]][index, ]
-#   z_i <- which(rmultinom(1, 1, Z_pp) == 1)
-#   w_i <- which(rmultinom(1, 1, W_pp) == 1)
-#   
-#   ## Use w_i to sample from multinomial 
-#   n_i <- as.vector(rmultinom(1, N, unlist(q[[b]][w_i])))
-#   
-#   m_i <- rep(NA, len = K)
-#   for(k in 1:K){
-#     m_i[k] <- rbinom(1, n_i[k], p[[b]][z_i][[1]][k])
-#   }
-#   total[b] <- sum(m_i * c(3, 2, 3, 2, 2, 3, 1))
-#   
-# }
-# tmp_df <- tibble(team_points = total, 
-#                  player_points = 0,
-#                  player = "Average")
-# results <- rbind(results, tmp_df)
-
 results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
   dplyr::filter(sample >= 3001)
-# df_players <- df |> 
-#   dplyr::filter(player != "Average") |> 
-#   dplyr::select(player, points, sample)
-# df_avg <- df |> 
-#   dplyr::filter(player == "Average") |> 
-#   dplyr::select(player, points, sample)
-# 
-# df <- dplyr::left_join(df_players, df_avg, by = "sample") |> 
-#   dplyr::mutate(points = points.x - points.y) |> 
-#   dplyr::select(player.x, points) |> 
-#   dplyr::rename(player = player.x)
+
 p <- ggplot(data = df %>% 
                    dplyr::mutate(., player = fct_reorder(player, points, 
                                                        .fun = 'mean')),
@@ -192,12 +152,10 @@ p <- ggplot(data = df %>%
 p + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   scale_fill_viridis_d(option = "H", alpha = .75) +
   scale_y_discrete(expand = c(0.015, 0)) +
-  # scale_x_continuous(breaks = seq(100, 125, by = 5), limits = c(98, 127)) +
   guides(fill = "none") +
   labs(y = "", 
        x = "expected points per game") +
   theme_light()
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_season_sim_h.png", hei = 10, wid = 8)
 
 players <- c("Giannis Antetokounmpo", "Stephen Curry","Luka Doncic", 
              "Nikola Jokic", "Kawhi Leonard","Joel Embiid","LeBron James",
@@ -219,8 +177,6 @@ p + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   labs(y = "", 
        x = "expected points per game above/below average") +
   theme_light()
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_season_sim.png", hei = 10, wid = 8)
-
 
 p <- ggplot(data = df |> 
               dplyr::filter(player %in% players) |> 
@@ -235,7 +191,6 @@ p + geom_boxplot() +
   coord_flip() +
   theme_light() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_season_sim_boxplots.png", hei = 7, wid = 10)
 
 df_grouped <- df |> 
   dplyr::filter(player %in% players) |>
@@ -257,25 +212,12 @@ p + geom_boxplot(stat = "identity") +
        y = "expected points per game above average") +
   theme_light() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_season_sim_boxplots.png", hei = 7, wid = 10)
 
 results <- readRDS("data/all-pts-above-avg.rds")
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
   dplyr::filter(sample >= 3000)
-
-# df_players <- df |> 
-#   dplyr::filter(player != "Average") |> 
-#   dplyr::select(player, points, sample)
-# df_avg <- df |> 
-#   dplyr::filter(player == "Average") |> 
-#   dplyr::select(player, points, sample)
-
-# df <- dplyr::left_join(df_players, df_avg, by = "sample") |> 
-#   dplyr::mutate(points = points.x - points.y) |> 
-#   dplyr::select(player.x, points) |> 
-#   dplyr::rename(player = player.x)
 
 df_props <- readRDS("data/all-avg-pts-above-data-2021.rds") 
 df_agg <- df |> 
@@ -291,6 +233,6 @@ p + geom_point() +
   scale_x_continuous(breaks = seq(.06, .32, by = .02)) +
   geom_text_repel() +
   geom_hline(yintercept = 0, linetype = 3) +
-  labs(x = "proportion of team shots by player", y = "mean points above/below average per game") +
+  labs(x = "proportion of team shots by player", 
+       y = "mean points above/below average per game") +
   theme_bw()
-ggsave("doc/fig/fg_pts_above_avg_by_prop_shots.png", hei = 8, wid = 12)

@@ -1,5 +1,4 @@
 ## Ryan Elmore
-## 2 Mar 2023
 ## Pts above/below average
 
 library(dplyr)
@@ -54,9 +53,6 @@ p + geom_boxplot(stat = "identity") +
   theme_bw() +
   scale_fill_brewer(palette = "Set1") +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_boxplots_all_stars_2021.png", 
-       hei = 7, wid = 10)
-
 
 p <- ggplot(data = df_fig |> 
               dplyr::mutate(player = fct_reorder(player, -y2)),
@@ -70,8 +66,6 @@ p + geom_boxplot(stat = "identity") +
   theme_bw() +
   scale_fill_brewer(palette = "Set1") +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-ggsave("doc/fig/fg_pts_above_avg_player_8K_10_10_5_boxplots_all_nba_2021.png", 
-       hei = 7, wid = 10)
 
 ## All NBA
 
@@ -115,8 +109,6 @@ p + geom_boxplot(stat = "identity") +
                                               'black', 'maroon', 'maroon', 
                                               'black', 'maroon',
                                               rep('black', 7))))
-ggsave("doc/fig/fg_pts_above_avg_player_all_nba_snubs_2021.png", 
-       hei = 5, wid = 7)
 
 ## PER and BPM
 
@@ -152,9 +144,6 @@ p + geom_point() +
   labs(y = "Box Plus/Minus", 
        x = "Mean EPAA per Game") +
   theme_bw()
-ggsave("doc/fig/fg_pts_above_avg_vs_bpm.png", 
-       hei = 5, wid = 6.5)
-
 
 p <- ggplot(data = df_per_bpm |> 
               dplyr::mutate(new_player = ifelse(m < -1 | per > 25 | m > 1 | 
@@ -167,20 +156,13 @@ p + geom_point() +
   labs(y = "Player Efficiency Rating", 
        x = "Mean EPAA per Game") +
   theme_bw()
-ggsave("doc/fig/fg_pts_above_avg_vs_per.png", 
-       hei = 5, wid = 6.5)
 
 p <- ggplot(data = df_per_bpm,
             aes(x = rank_epaa, y = rank_per))
 p + geom_point() +
-  # scale_x_continuous(breaks = seq(-4, 2, by = 1), limits = c(-4, 2.1)) +
-  # scale_y_continuous(breaks = seq(10, 35, by = 5)) +
-  # geom_text_repel() +
   labs(y = "Ranked Player Efficiency Rating", 
        x = "Ranks Mean Points Above/Below Average per Game") +
   theme_bw()
-ggsave("doc/fig/fg_pts_above_avg_vs_per_ranks.png", 
-       hei = 9, wid = 10)
 
 df_new <- df_per_bpm |> na.omit()
 cor(df_new$m, df_new$per, method = "kendall")

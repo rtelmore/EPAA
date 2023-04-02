@@ -1,6 +1,5 @@
 ## Ryan Elmore
 ## Player Clustering for all teams
-## 31 October 31
 
 library(dplyr)
 library(ggplot2)
