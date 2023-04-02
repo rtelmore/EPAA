@@ -1,13 +1,10 @@
 ## Ryan Elmore
-## 27 Oct 2022
 ## Bayesian Hierarchical MCMC algorithm 
 
-shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |> 
-  na.omit()
+shots_data <- readRDS("data/nba-zone-combined-team-w-fts.rds")
 
 bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 10, n_w = 10,
                             alpha = 0.1, seed = 1994){
-
   require(dplyr)
   require(tidyr)
   require(MCMCpack)
@@ -26,24 +23,24 @@ bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 10, n_w = 10,
   
   
   location_prob <- df_shots %>% 
-    dplyr::ungroup() %>% 
-    dplyr::select(c(yearSeason, slugSeason, namePlayer, dplyr::ends_with("_n"))) %>% 
+    dplyr::select(c(team_season, dplyr::ends_with("_n"))) %>% 
     dplyr::mutate(., n = rowSums(select_if(., is.numeric))) %>% 
-    dplyr::mutate_at(., vars(-yearSeason, -slugSeason, -namePlayer), ~ ./n) %>% 
-    dplyr::select(-c(n, yearSeason, slugSeason, namePlayer))
+    dplyr::mutate_at(., vars(-team_season), ~ ./n) %>% 
+    dplyr::select(-c(n, team_season))
   
   df_N <- df_shots %>% 
-    dplyr::ungroup() %>% 
     dplyr::select(., dplyr::ends_with("_n"))
   df_M <- df_shots %>% 
-    dplyr::ungroup() %>% 
     dplyr::select(., dplyr::ends_with("_m"))
   
+  # B <- 10000 # Number of MCMC iterations
+  # K <- 7 # Regions on the court
+  # n_z <- 10 # accuracy clusters
+  # n_w <- 10 # shot selection clusters
+
   ## Init. clusterings
   ## 1. Cluster Z's on probabilities
-  df_p <- df_shots %>%
-    dplyr::ungroup() %>%
-    dplyr::select(ends_with("_p"))
+  df_p <- dplyr::select(df_shots, ends_with("_p"))
   Z <- kmeans(df_p, n_z)$cluster
   ## 2. Cluster W's on shot location probabilities
   W <- kmeans(location_prob, n_w)$cluster
@@ -108,22 +105,22 @@ bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 10, n_w = 10,
   }
 
   parms <- paste(n_z, n_w, alpha, sep = "_")
-  saveRDS(Z_pp, paste("data/players/z_pp_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(Z_pp, paste("data/teams/z_pp_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                       sep = ""))
-  saveRDS(W_pp, paste("data/players/w_pp_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(W_pp, paste("data/teams/w_pp_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                       sep = ""))
-  saveRDS(pi_z, paste("data/players/pi_z_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(pi_z, paste("data/teams/pi_z_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                       sep = ""))
-  saveRDS(pi_w, paste("data/players/pi_w_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(pi_w, paste("data/teams/pi_w_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                       sep = ""))
-  saveRDS(p, paste("data/players/p_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(p, paste("data/teams/p_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                    sep = "")) 
-  saveRDS(q, paste("data/players/q_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
+  saveRDS(q, paste("data/teams/q_", parms, "_", format(Sys.Date(), "%d%m%Y"), ".rds", 
                    sep = ""))
 
 }
 
-bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 5)
-#bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 0.1)
-#bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 0.1)
-#bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 5)
+bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 0.1)
+bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 5)
+bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 0.1)
+bayes_hier_mcmc(shots_data, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 5)
