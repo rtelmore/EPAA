@@ -7,7 +7,7 @@ library(tidyr)
 library(ggridges)
 library(forcats)
 
-source("99-prediction-functions.R")
+source("src/99-prediction-functions.R")
 
 df <- readRDS("data/nba-zone-combined-team-w-fts.rds") %>% 
   tidyr::separate(., team_season, into = c("team", "season"), sep = "_") 
@@ -37,15 +37,14 @@ teams <- df |>
 teams <- c(teams, "Average")
 
 set.seed(19892)
-alpha <- 5
-dimension <- 10
-string <- ifelse(alpha == 5, 
-                 paste(dimension, "_", dimension, "_", alpha, sep = ""),
-                 paste(dimension, "_", dimension, "_0.", alpha, sep = ""))
-w <- readRDS(paste("data/teams/w_pp_", string, "_04122021.rds", sep = ""))
-z <- readRDS(paste("data/teams/z_pp_", string, "_04122021.rds", sep = ""))
-p <- readRDS(paste("data/teams/p_", string, "_04122021.rds", sep = ""))
-q <- readRDS(paste("data/teams/q_", string, "_04122021.rds", sep = ""))
+alpha <- .1
+dimension <- 30
+string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
+string
+w <- readRDS(paste("data/teams/w_pp_", string, "_18102023.rds", sep = ""))
+z <- readRDS(paste("data/teams/z_pp_", string, "_18102023.rds", sep = ""))
+p <- readRDS(paste("data/teams/p_", string, "_18102023.rds", sep = ""))
+q <- readRDS(paste("data/teams/q_", string, "_18102023.rds", sep = ""))
 
 N <- 8000 #shots
 K <- 7
@@ -100,12 +99,14 @@ results <- results |>
 p_comp <- ggplot(data = results %>% 
                    dplyr::mutate(., team = fct_reorder(team, points, 
                                                        .fun = 'mean')),
-                 aes(x = points/72, y = team, fill = team))#, group = player, fill = player))
+                 aes(x = points/72, y = team))#, group = player, fill = player))
+#  scale_fill_viridis_d(option = "H", alpha = .75) +
+
 p_comp + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
-  scale_fill_viridis_d(option = "H", alpha = .75) +
- scale_y_discrete(expand = c(0.036, 0)) +
+  scale_y_discrete(expand = c(0.036, 0)) +
   scale_x_continuous(breaks = seq(100, 125, by = 5), limits = c(98, 127)) +
   guides(fill = "none") +
   labs(y = "", 
        x = "expected points per game") +
   theme_light()
+
