@@ -16,22 +16,22 @@ df_nba <- readRDS("data/all-shots.rds")
 shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |> 
   na.omit()
 
-alpha <- 5
-dimension <- 10
+alpha <- 0.1
+dimension <- 30
 K <- 7
 
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
-
+string
 ## Read in the w, z, p, and q data
-w <- readRDS("path_to_team_data")
-z <- readRDS("path_to_team_data")
-p <- readRDS("path_to_team_data")
-q <- readRDS("path_to_team_data")
+w <- readRDS("data/teams/w_pp_30_30_0.1_18102023.rds")
+z <- readRDS("data/teams/z_pp_30_30_0.1_18102023.rds")
+p <- readRDS("data/teams/p_30_30_0.1_18102023.rds")
+q <- readRDS("data/teams/q_30_30_0.1_18102023.rds")
 
-w_p <- readRDS("path_to_player_data")
-z_p <- readRDS("path_to_player_data")
-p_p <- readRDS("path_to_player_data")
-q_p <- readRDS("path_to_player_data")
+w_p <- readRDS("data/players/w_pp_30_30_0.1_20102023.rds")
+z_p <- readRDS("data/players/z_pp_30_30_0.1_20102023.rds")
+p_p <- readRDS("data/players/p_30_30_0.1_20102023.rds")
+q_p <- readRDS("data/players/q_30_30_0.1_20102023.rds")
 
 season_sim = 2021
 
@@ -167,9 +167,9 @@ p <- ggplot(data = df |>
               dplyr::filter(player %in% players) |> 
               dplyr::mutate(player = fct_reorder(player, points, 
                                                     .fun = 'mean')),
-            aes(x = points/72, y = player, fill = player))#, group = player, fill = player))
+            aes(x = points/72, y = player))#, group = player, fill = player))
 p + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
-  scale_fill_viridis_d(option = "H", alpha = .75) +
+#  scale_fill_viridis_d(option = "H", alpha = .75) +
   scale_y_discrete(expand = c(0, 0)) +
   scale_x_continuous(breaks = seq(-8, 8, by = 2), limits = c(-8, 8)) +
   geom_vline(xintercept = 0, linetype = 3) +
@@ -229,7 +229,7 @@ df_comb <- dplyr::left_join(df_props, df_agg) |>
 
 p <- ggplot(df_comb, aes(y = m, x = prop, label = new_player))
 p + geom_point() +
-  scale_y_continuous(breaks = seq(-4, 2, by = 1), limits = c(-4, 2.1)) +
+  scale_y_continuous(breaks = seq(-4, 3, by = 1), limits = c(-4, 3)) +
   scale_x_continuous(breaks = seq(.06, .32, by = .02)) +
   geom_text_repel() +
   geom_hline(yintercept = 0, linetype = 3) +

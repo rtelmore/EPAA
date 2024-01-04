@@ -102,13 +102,17 @@ p + geom_boxplot(stat = "identity") +
   theme_bw() +
   scale_fill_brewer(palette = "Set2") +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,
-                                   face = c(rep('plain', 5), rep('bold', 2),
-                                            'plain', 'bold', 'bold', 'plain', 'bold',
-                                            rep('plain', 7)),
-                                   colour = c(rep('black', 5), rep('maroon', 2),
-                                              'black', 'maroon', 'maroon', 
-                                              'black', 'maroon',
-                                              rep('black', 7))))
+                                   face = c(rep('plain', 3), rep('bold', 2),
+                                            'plain', 'bold', 
+                                            rep('plain', 3), 'bold', 
+                                            rep('plain', 6), 'bold',
+                                            'plain'),
+                                   colour = c(rep('black', 3), rep('maroon', 2),
+                                              'black', 'maroon', 
+                                              rep('black', 3), 'maroon', 
+                                              rep('black', 6), 'maroon',
+                                              'black')))
+
 
 ## PER and BPM
 
@@ -138,8 +142,8 @@ p <- ggplot(data = df_per_bpm |>
                                                   bpm < -.5, player, NA)),
             aes(x = m, y = bpm, label = new_player))
 p + geom_point() +
-  scale_x_continuous(breaks = seq(-4, 2, by = 1), limits = c(-4, 2.1)) +
-  scale_y_continuous(breaks = seq(-2, 13, by = 2)) +
+  scale_x_continuous(breaks = seq(-4, 4, by = 1), limits = c(-4, 4)) +
+  scale_y_continuous(breaks = seq(-4, 15, by = 2)) +
   geom_text_repel() +
   labs(y = "Box Plus/Minus", 
        x = "Mean EPAA per Game") +

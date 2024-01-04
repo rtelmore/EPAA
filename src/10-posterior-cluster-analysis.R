@@ -5,8 +5,8 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-dimension <- 10
-alpha <- 5
+dimension <- 30
+alpha <- 1
 
 ## The following file path is given in 09-poster-clusters-all-teams.R
 
@@ -14,7 +14,7 @@ tt <- readRDS(paste("data/teams/posterior-clusters-",
                      dimension, "-", dimension, "-", alpha, 
                      "-2009.rds", sep = ""))
 
-make_cluster_plots <- function(dimension = 10, alpha = 5){
+make_cluster_plots <- function(dimension = 30, alpha = 1){
   
   df <- dplyr::bind_rows(readRDS(paste("data/teams/posterior-clusters-",
                                        dimension, "-", dimension, "-", alpha, 
@@ -69,7 +69,7 @@ make_cluster_plots <- function(dimension = 10, alpha = 5){
   p <- ggplot(data = tmp %>% dplyr::filter(season >= 2010),
               aes(x = team, y = n, fill = as.factor(w_cluster)))
   p + geom_bar(position = "stack", stat = "identity") +
-    scale_fill_brewer("cluster", palette = "Paired") +
+#    scale_fill_brewer("cluster", palette = "Paired") +
     scale_x_discrete("") +
     facet_wrap(. ~ season) +
     theme_bw() +
@@ -87,7 +87,7 @@ make_cluster_plots <- function(dimension = 10, alpha = 5){
   p <- ggplot(data = tmp %>% dplyr::filter(season >= 2010),
               aes(x = team, y = n, fill = as.factor(z_cluster)))
   p + geom_bar(position = "stack", stat = "identity") +
-    scale_fill_brewer("cluster", palette = "Paired") +
+#    scale_fill_brewer("cluster", palette = "Paired") +
     scale_x_discrete("") +
     facet_wrap(. ~ season) +
     theme_bw() +
@@ -98,7 +98,7 @@ make_cluster_plots <- function(dimension = 10, alpha = 5){
                hei = 12, wid = 9)
 }
 
-make_cluster_plots(dimension = 5, alpha = 1)
+make_cluster_plots(dimension = 30, alpha = 1)
 make_cluster_plots(dimension = 5, alpha = 5)
 make_cluster_plots(dimension = 10, alpha = 1)
 make_cluster_plots(dimension = 10, alpha = 5)
