@@ -38,13 +38,13 @@ teams <- c(teams, "Average")
 
 set.seed(19892)
 alpha <- 0.1
-dimension <- 30
+dimension <- 10
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 #string
-w <- readRDS(paste("data/teams/w_pp_", string, "_18102023.rds", sep = ""))
-z <- readRDS(paste("data/teams/z_pp_", string, "_18102023.rds", sep = ""))
-p <- readRDS(paste("data/teams/p_", string, "_18102023.rds", sep = ""))
-q <- readRDS(paste("data/teams/q_", string, "_18102023.rds", sep = ""))
+w <- readRDS(paste("data/teams/w_pp_", string, "_22102023.rds", sep = ""))
+z <- readRDS(paste("data/teams/z_pp_", string, "_22102023.rds", sep = ""))
+p <- readRDS(paste("data/teams/p_", string, "_22102023.rds", sep = ""))
+q <- readRDS(paste("data/teams/q_", string, "_22102023.rds", sep = ""))
 
 N <- 8000 #shots
 K <- 7
@@ -109,7 +109,7 @@ df <- bind_rows(results_10_10_0.1 |>
                   dplyr::mutate(alpha = 5, dim = 10),
                 results_30_30_5 |> 
                   dplyr::mutate(alpha = 5, dim = 30))
-
+saveRDS(df, "data/teams/epaa-all.rds")
 df_group <- df |> 
   group_by(alpha, dim, team) |> 
   summarize(mean = mean(points),
@@ -133,6 +133,26 @@ p_comp + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
 ggsave("fig/epaa/epaa-30-30-5.pdf", height = 11, width = 8.5)
 
 ## supplement figure
+p <- ggplot(data = df |> 
+              filter(team != "Average") |> 
+              mutate(team = fct_reorder(team, points, .fun = 'mean'),
+                     cat = paste("(", paste(dim, alpha, sep = ", "), ")", sep = "")),
+            aes(x = team, 
+                y = points/72,
+                fill = cat))
+
+p + geom_boxplot(position = position_dodge(width = .7),
+                 outlier.shape = NA) +
+  coord_flip() +
+  labs(x = "", 
+       y = "mean expected points per game") +
+  scale_y_continuous(breaks = seq(98, 128, by = 2)) +
+  scale_fill_brewer(palette = "Dark2") +
+  guides(fill = guide_legend(title = "(clusters, alpha):")) +
+  theme_light() +
+  theme(legend.position = "bottom")
+ggsave("fig/epaa/epaa-all.pdf", height = 11, width = 8.5)
+
 
 p <- ggplot(data = df_group |> 
               mutate(team = fct_reorder(team, mean, .fun = 'mean'),
@@ -149,20 +169,3 @@ p + geom_dotplot(binaxis = "y", alpha = .75) +
   guides(fill = guide_legend(title = "(clusters, alpha):")) +
   theme_light() +
   theme(legend.position = "bottom")
-ggsave("fig/epaa/epaa-all.pdf", height = 11, width = 8.5)
-## Beeswarm?
-library(ggbeeswarm)
-p <- ggplot(df |>
-              mutate(team = fct_reorder(team, points, .fun = 'mean'),
-                     cat = paste("(", paste(dim, alpha, sep = ", "), ")", 
-                                 sep = "")) |> 
-              group_by(team, cat) |> 
-              sample_n(50), 
-            aes(team, points, col = cat))
-p + geom_beeswarm(dodge.width = 0.25, alpha = .5) +
-  theme_light() +
-  coord_flip() +
-  scale_color_brewer(palette = "Set1") +
-  guides(color = guide_legend(title = "(dim, alpha)"))
-  
-ggplot(sub_mpg, aes(class, displ, color=factor(cyl))) + geom_beeswarm(dodge.width=0.5)
