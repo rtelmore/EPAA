@@ -8,8 +8,8 @@ library(tidyr)
 teams <- readRDS("data/nba-zone-combined-team-w-fts.rds") %>% 
   tidyr::separate(., team_season, into = c("team", "season"), sep = "_")
 
-z_pp_df <- readRDS("data/teams/z_pp_30_30_0.1_18102023.rds")
-w_pp_df <- readRDS("data/teams/w_pp_30_30_0.1_18102023.rds")
+z_pp_df <- readRDS("data/teams/z_pp_30_30_5_21102023.rds")
+w_pp_df <- readRDS("data/teams/w_pp_30_30_5_21102023.rds")
 
 
 set.seed(109823)
@@ -37,5 +37,5 @@ for(s in seq_along(seasons)){
       } else results <- tmp
     }
   }
-  saveRDS(results, paste("data/teams/posterior-clusters-30-30-1-", seasons[s], ".rds", sep = ""))
+  saveRDS(results, paste("data/teams/posterior-clusters-30-30-5-", seasons[s], ".rds", sep = ""))
 }

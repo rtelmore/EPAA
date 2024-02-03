@@ -1,10 +1,11 @@
 ## Ryan Elmore
 ## Bayesian Hierarchical MCMC algorithm 
 
-shots_data <- readRDS("data/nba-zone-combined-team-w-fts.rds")
+## Note: p and q are the opposite of what is written in the paper. Ugh.
 
+shots_data <- readRDS("data/nba-zone-combined-team-w-fts.rds")
 bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 10, n_w = 10,
-                            alpha = 0.1, seed = 1994){
+                            alpha = 5, seed = 1994){
   require(dplyr)
   require(tidyr)
   require(MCMCpack)

@@ -16,128 +16,163 @@ df_nba <- readRDS("data/all-shots.rds")
 shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |> 
   na.omit()
 
-alpha <- 0.1
+alpha <- 5
 dimension <- 30
 K <- 7
 
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 string
 ## Read in the w, z, p, and q data
-w <- readRDS("data/teams/w_pp_30_30_0.1_18102023.rds")
-z <- readRDS("data/teams/z_pp_30_30_0.1_18102023.rds")
-p <- readRDS("data/teams/p_30_30_0.1_18102023.rds")
-q <- readRDS("data/teams/q_30_30_0.1_18102023.rds")
+w <- readRDS("data/teams/w_pp_30_30_5_21102023.rds")
+z <- readRDS("data/teams/z_pp_30_30_5_21102023.rds")
+p <- readRDS("data/teams/p_30_30_5_21102023.rds")
+q <- readRDS("data/teams/q_30_30_5_21102023.rds")
 
-w_p <- readRDS("data/players/w_pp_30_30_0.1_20102023.rds")
-z_p <- readRDS("data/players/z_pp_30_30_0.1_20102023.rds")
-p_p <- readRDS("data/players/p_30_30_0.1_20102023.rds")
-q_p <- readRDS("data/players/q_30_30_0.1_20102023.rds")
-
-season_sim = 2021
-
-df_teams <- df_tmp |> 
-  dplyr::filter(season == season_sim) |> 
-  dplyr::select(team, season, tidyr::ends_with("_n")) |> 
-  dplyr::mutate(team_shots = rowSums(across(where(is.numeric)))) |> 
-  dplyr::select(team, season, team_shots) |> 
-  dplyr::mutate(season = as.numeric(season))
+w_p <- readRDS("data/players/w_pp_30_30_5_23102023.rds")
+z_p <- readRDS("data/players/z_pp_30_30_5_23102023.rds")
+p_p <- readRDS("data/players/p_30_30_5_23102023.rds")
+q_p <- readRDS("data/players/q_30_30_5_23102023.rds")
 
 players <- readRDS("data/all-shots-players-w-fts.rds") |> 
   dplyr::rename(player = namePlayer,
                 season = yearSeason)
 
-players_sub <- players |> 
-  dplyr::ungroup() |> 
-  dplyr::filter(season == 2021) |> 
-  dplyr::select(player, season, n, ft_n) |> 
-  dplyr::mutate(player_shots = n + ft_n)
-
-df_player_team <- df_nba |> 
-  dplyr::select(yearSeason, namePlayer, nameTeam) |> 
-  dplyr::rename(season = yearSeason, 
-                player = namePlayer,
-                team = nameTeam) |> 
-  dplyr::filter(season == 2021) |> 
-  dplyr::distinct()
-
-df <- dplyr::left_join(players_sub, df_player_team) |> 
-  dplyr::left_join(df_teams) |> 
-  dplyr::mutate(prop_shots = player_shots/team_shots) |> 
-  dplyr::group_by(player, season) |> 
-  dplyr::summarize(prop = max(prop_shots)) |> 
-  dplyr::mutate(player_shots = round(8000*prop), 
-                team_shots = round(8000*(1-prop))) |> 
-  dplyr::ungroup()
-
-saveRDS(df, paste("data/all-avg-pts-above-data-", season_sim, ".rds", sep = ""))
-
-df <- readRDS(paste("data/all-avg-pts-above-data-", season_sim, ".rds", sep = ""))
-
-teams_data <- df_tmp |> 
-  dplyr::filter(season == season_sim) |> 
-  dplyr::distinct(team) |> 
-  dplyr::pull()
-
-#i <- 1
-
-B <- 10000
-set.seed(19892)
-rm(results)
-for(i in seq_along(df$player)){
-  # i <- 10
-  cat(sprintf("Player %s at %s \n", df$player[i], Sys.time()))
-  player <- df$player[i]
-  N_team <- df$player_shots[i] #shots
-  N_player <- df$player_shots[i] #shots
+seasons <- 2021
+season_sim <- 2021
+for (i in seq_along(seasons)){
   
-  total_team <- numeric(B)
-  total_player <- numeric(B)
+  season_sim <- seasons[i]
   
-#  team_index <- which(df_tmp$team == sample(teams_data, size = 1) & df_tmp$season == 2021)
-  player_index <- which(shots_data_players$namePlayer == df$player[i] & 
-                          shots_data_players$yearSeason == season_sim)
-  for (b in 1:B) {
-    #b <- 5000
-    team_index <- which(df_tmp$team == sample(teams_data, size = 1) & 
-                          df_tmp$season == season_sim)
-    if(b %% 5000 == 0){
-      cat(sprintf(" - Iteration %s at %s \n", b, Sys.time()))
+  cat(sprintf("Season %s at %s \n\n", df$player[i], Sys.time()))
+  
+  df_teams <- df_tmp |> 
+    dplyr::filter(season == season_sim) |> 
+    dplyr::select(team, season, tidyr::ends_with("_n")) |> 
+    dplyr::mutate(team_shots = rowSums(across(where(is.numeric)))) |> 
+    dplyr::select(team, season, team_shots) |> 
+    dplyr::mutate(season = as.numeric(season))
+  
+  players_sub <- players |> 
+    dplyr::ungroup() |> 
+    dplyr::filter(season == season_sim) |> 
+    dplyr::select(player, season, n, ft_n) |> 
+    dplyr::mutate(player_shots = n + ft_n)
+  
+  df_player_team <- df_nba |> 
+    dplyr::select(yearSeason, namePlayer, nameTeam) |> 
+    dplyr::rename(season = yearSeason, 
+                  player = namePlayer,
+                  team = nameTeam) |> 
+    dplyr::filter(season == season_sim) |> 
+    dplyr::distinct()
+  
+  df <- dplyr::left_join(players_sub, df_player_team) |> 
+    dplyr::left_join(df_teams) |> 
+    dplyr::mutate(prop_shots = player_shots/team_shots) |> 
+    dplyr::group_by(player, season) |> 
+    dplyr::summarize(prop = max(prop_shots)) |> 
+    dplyr::mutate(player_shots = round(8000*prop), 
+                  team_shots = round(8000*(1-prop))) |> 
+    dplyr::ungroup()
+  
+  # saveRDS(df, paste("data/all-avg-pts-above-data-10-10-0.1-", season_sim, ".rds", sep = ""))
+  
+  df <- df |> #readRDS(paste("data/all-avg-pts-above-data-10-10-0.1-", season_sim, ".rds", sep = "")) |> 
+    dplyr::filter(player != "Enes Kanter")
+  
+  teams_data <- df_tmp |> 
+    dplyr::filter(season == season_sim) |> 
+    dplyr::distinct(team) |> 
+    dplyr::pull()
+  
+  #i <- 1
+  
+  B <- 10000
+  set.seed(19892)
+  rm(results)
+  for(i in seq_along(df$player)){
+    # i <- 10
+    cat(sprintf(" Player %s at %s \n", df$player[i], Sys.time()))
+    player <- df$player[i]
+    N_team <- df$player_shots[i] #shots
+    N_player <- df$player_shots[i] #shots
+    
+    total_team <- numeric(B)
+    total_player <- numeric(B)
+    
+    #  team_index <- which(df_tmp$team == sample(teams_data, size = 1) & df_tmp$season == 2021)
+    player_index <- which(shots_data_players$namePlayer == df$player[i] & 
+                            shots_data_players$yearSeason == season_sim)
+    for (b in 1:B) {
+      #b <- 5000
+      team_index <- which(df_tmp$team == sample(teams_data, size = 1) & 
+                            df_tmp$season == season_sim)
+      if(b %% 5000 == 0){
+        cat(sprintf("  - Iteration %s at %s \n", b, Sys.time()))
+      }
+      Z_pp <- z[[b]][team_index, ]
+      W_pp <- w[[b]][team_index, ]
+      z_i <- which(rmultinom(1, 1, Z_pp) == 1)
+      w_i <- which(rmultinom(1, 1, W_pp) == 1)
+      
+      Z_pp_p <- z_p[[b]][player_index, ]
+      W_pp_p <- w_p[[b]][player_index, ]
+      z_i_p <- which(rmultinom(1, 1, Z_pp_p) == 1)
+      w_i_p <- which(rmultinom(1, 1, W_pp_p) == 1)
+      
+      ## Use w_i to sample from multinomial 
+      n_i <- as.vector(rmultinom(1, N_team, unlist(q[[b]][w_i])))
+      n_i_p <- as.vector(rmultinom(1, N_player, unlist(q_p[[b]][w_i_p])))
+      
+      m_i <- rep(NA, len = K)
+      m_i_p <- rep(NA, len = K)
+      for(k in 1:K){
+        m_i[k] <- rbinom(1, n_i[k], p[[b]][z_i][[1]][k])
+        m_i_p[k] <- rbinom(1, n_i_p[k], p_p[[b]][z_i_p][[1]][k])
+      }
+      total_team[b] <- sum(m_i * c(3, 2, 3, 2, 2, 3, 1))
+      total_player[b] <- sum(m_i_p * c(3, 2, 3, 2, 2, 3, 1))
+      
     }
-    Z_pp <- z[[b]][team_index, ]
-    W_pp <- w[[b]][team_index, ]
-    z_i <- which(rmultinom(1, 1, Z_pp) == 1)
-    w_i <- which(rmultinom(1, 1, W_pp) == 1)
     
-    Z_pp_p <- z_p[[b]][player_index, ]
-    W_pp_p <- w_p[[b]][player_index, ]
-    z_i_p <- which(rmultinom(1, 1, Z_pp_p) == 1)
-    w_i_p <- which(rmultinom(1, 1, W_pp_p) == 1)
-    
-    ## Use w_i to sample from multinomial 
-    n_i <- as.vector(rmultinom(1, N_team, unlist(q[[b]][w_i])))
-    n_i_p <- as.vector(rmultinom(1, N_player, unlist(q_p[[b]][w_i_p])))
-    
-    m_i <- rep(NA, len = K)
-    m_i_p <- rep(NA, len = K)
-    for(k in 1:K){
-      m_i[k] <- rbinom(1, n_i[k], p[[b]][z_i][[1]][k])
-      m_i_p[k] <- rbinom(1, n_i_p[k], p_p[[b]][z_i_p][[1]][k])
-    }
-    total_team[b] <- sum(m_i * c(3, 2, 3, 2, 2, 3, 1))
-    total_player[b] <- sum(m_i_p * c(3, 2, 3, 2, 2, 3, 1))
+    tmp_df <- tibble(team_points = total_team, 
+                     player_points = total_player,
+                     player = player)
+    if(exists("results")){
+      results <- rbind(results, tmp_df)
+    } else results <- tmp_df
     
   }
   
-  tmp_df <- tibble(team_points = total_team, 
-                   player_points = total_player,
-                   player = player)
-  if(exists("results")){
-    results <- rbind(results, tmp_df)
-  } else results <- tmp_df
+  saveRDS(results, paste("data/all-pts-above-avg-30-30-5-", season_sim, ".rds", sep = ""))
   
 }
 
-saveRDS(results, paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
+df <- dplyr::bind_rows(readRDS("data/all-pts-above-avg-2010.rds") |>
+                         dplyr::mutate(season = 2010),
+                       readRDS("data/all-pts-above-avg-2011.rds") |>
+                         dplyr::mutate(season = 2011),
+                       readRDS("data/all-pts-above-avg-2012.rds") |>
+                         dplyr::mutate(season = 2012),
+                       readRDS("data/all-pts-above-avg-2013.rds") |>
+                         dplyr::mutate(season = 2013),
+                       readRDS("data/all-pts-above-avg-2014.rds") |>
+                         dplyr::mutate(season = 2014),
+                       readRDS("data/all-pts-above-avg-2015.rds") |>
+                         dplyr::mutate(season = 2015),
+                       readRDS("data/all-pts-above-avg-2016.rds") |>
+                         dplyr::mutate(season = 2016),
+                       readRDS("data/all-pts-above-avg-2017.rds") |>
+                         dplyr::mutate(season = 2017),
+                       readRDS("data/all-pts-above-avg-2018.rds") |>
+                         dplyr::mutate(season = 2018),
+                       readRDS("data/all-pts-above-avg-2019.rds") |>
+                         dplyr::mutate(season = 2019),
+                       readRDS("data/all-pts-above-avg-2020.rds") |>
+                         dplyr::mutate(season = 2020),
+                       readRDS("data/all-pts-above-avg-2021.rds") |>
+                         dplyr::mutate(season = 2021))
+saveRDS(df, "data/all-pts-above-avg-10-21.rds")
 
 results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 df <- results |> 
@@ -213,26 +248,31 @@ p + geom_boxplot(stat = "identity") +
   theme_light() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-results <- readRDS("data/all-pts-above-avg.rds")
+results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
-  dplyr::filter(sample >= 3000)
+  dplyr::filter(sample >= 3001)
 
 df_props <- readRDS("data/all-avg-pts-above-data-2021.rds") 
 df_agg <- df |> 
   dplyr::group_by(player) |> 
-  dplyr::summarize(m = mean(points)/72)
+  dplyr::summarize(m = mean(points)/72,
+                   `standard deviation:` = sd(points/72))
 
 df_comb <- dplyr::left_join(df_props, df_agg) |> 
   dplyr::mutate(new_player = ifelse(m <= -1 | m > .9 | prop > .22, player, ""))
 
 p <- ggplot(df_comb, aes(y = m, x = prop, label = new_player))
-p + geom_point() +
+p + geom_point(aes(size = `standard deviation:`)) +
   scale_y_continuous(breaks = seq(-4, 3, by = 1), limits = c(-4, 3)) +
   scale_x_continuous(breaks = seq(.06, .32, by = .02)) +
   geom_text_repel() +
   geom_hline(yintercept = 0, linetype = 3) +
   labs(x = "proportion of team shots by player", 
        y = "mean points above/below average per game") +
-  theme_bw()
+  theme_light() +
+  theme(legend.position = "bottom")
+
+ggsave("fig/fg_pts_above_avg_by_prop_shots.png", hei = 8, wid = 12)
+

@@ -23,17 +23,17 @@ K <- 7
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 
 ## Read in the w, z, p, and q data
-w <- readRDS("path_to_team_data")
-z <- readRDS("path_to_team_data")
-p <- readRDS("path_to_team_data")
-q <- readRDS("path_to_team_data")
+w <- readRDS("data/teams/w_pp_10_10_5_22102023.rds")
+z <- readRDS("data/teams/z_pp_10_10_5_22102023.rds")
+p <- readRDS("data/teams/p_10_10_5_22102023.rds")
+q <- readRDS("data/teams/q_10_10_5_22102023.rds")
 
-w_p <- readRDS("path_to_player_data")
-z_p <- readRDS("path_to_player_data")
-p_p <- readRDS("path_to_player_data")
-q_p <- readRDS("path_to_player_data")
+w_p <- readRDS("data/players/w_pp_10_10_5_23102023.rds")
+z_p <- readRDS("data/players/z_pp_10_10_5_23102023.rds")
+p_p <- readRDS("data/players/p_10_10_5_23102023.rds")
+q_p <- readRDS("data/players/q_10_10_5_23102023.rds")
 
-season_sim <- 2010
+season_sim = 2021
 
 df_teams <- df_tmp |> 
   dplyr::filter(season == season_sim) |> 
@@ -138,13 +138,33 @@ for(i in seq_along(df$player)){
 
 saveRDS(results, paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 
-season_sim = 2021
+season_sim <- 2021
 results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
   dplyr::filter(sample >= 3001)
 
+results <- data.frame(player= unique(df$player), 
+                      ESS = rep(NA, 100))
+for(i in 1:100){
+  tmp <- df |> 
+    filter(player == results$player[i]) |> 
+    pull(points)
+#  print(length(tmp))
+  results$ESS[i] <- coda::effectiveSize(tmp)
+}
+
+results$ESS[results$ESS > 7000] <- 7000
+p <- ggplot(data = results,
+            aes(x = ESS))
+p + geom_histogram() +
+  scale_x_continuous(breaks = seq(500, 8000, by = 500)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 10)) +
+  labs(x = "Effective Sample Size") +
+  theme_bw()
+
+ggsave("fig/players/ess-top-100.png", hei = 6, width = 8)
 p <- ggplot(data = df %>% 
                    dplyr::mutate(., player = fct_reorder(player, points, 
                                                        .fun = 'mean')),
@@ -217,7 +237,7 @@ results <- readRDS("data/all-pts-above-avg-2021.rds")
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
-  dplyr::filter(sample >= 3000)
+  dplyr::filter(sample >= 3001)
 
 df_props <- readRDS("data/all-avg-pts-above-data-2021.rds") 
 df_agg <- df |> 
@@ -284,3 +304,5 @@ p_ranks + geom_point() +
   scale_x_continuous(breaks = 2010:2021, minor_breaks = NULL) +
   scale_y_reverse(breaks = seq(0, 100, by = 5)) +
   theme_bw()
+
+ggsave("fig/epaa-player-ranks.png", hei = 8, wid = 11.5)

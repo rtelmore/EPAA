@@ -6,6 +6,8 @@ library(ggplot2)
 library(tidyr)
 library(ggridges)
 library(forcats)
+library(coda)
+
 
 source("src/99-prediction-functions.R")
 
@@ -110,14 +112,13 @@ df <- bind_rows(results_10_10_0.1 |>
                 results_30_30_5 |> 
                   dplyr::mutate(alpha = 5, dim = 30))
 saveRDS(df, "data/teams/epaa-all.rds")
-df_group <- df |> 
-  group_by(alpha, dim, team) |> 
-  summarize(mean = mean(points),
-            median = median(points),
-            std = sd(points)) |> 
-  ungroup()
 
-p_comp <- ggplot(data = results %>% 
+df <- readRDS("data/teams/epaa-all.rds") |> 
+  filter(dim == 10, alpha == 5, team != "Average") |> 
+  mutate(iter = rep(1:10000, times = 30)) |> 
+  filter(iter >= 3001)
+
+p_comp <- ggplot(data = df %>% 
                    dplyr::mutate(., team = fct_reorder(team, points, 
                                                        .fun = 'mean')),
                  aes(x = points/72, y = team))#, group = player, fill = player))
@@ -130,9 +131,20 @@ p_comp + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   labs(y = "", 
        x = "expected points per game") +
   theme_light()
-ggsave("fig/epaa/epaa-30-30-5.pdf", height = 11, width = 8.5)
+ggsave("fig/epaa/epaa-10-10-5.png", height = 11, width = 8.5)
+
+## ESS Calculation
+results <- data.frame(team = unique(df$team), 
+                      ESS = rep(NA, 30))
+for(i in 1:30){
+  tmp <- df |> 
+    filter(team == results$team[i]) |> 
+    pull(points)
+  results$ESS[i] <- coda::effectiveSize(tmp)
+}
 
 ## supplement figure
+df <- readRDS("data/teams/epaa-all.rds")
 p <- ggplot(data = df |> 
               filter(team != "Average") |> 
               mutate(team = fct_reorder(team, points, .fun = 'mean'),
@@ -145,13 +157,13 @@ p + geom_boxplot(position = position_dodge(width = .7),
                  outlier.shape = NA) +
   coord_flip() +
   labs(x = "", 
-       y = "mean expected points per game") +
+       y = "expected points per game") +
   scale_y_continuous(breaks = seq(98, 128, by = 2)) +
   scale_fill_brewer(palette = "Dark2") +
   guides(fill = guide_legend(title = "(clusters, alpha):")) +
   theme_light() +
   theme(legend.position = "bottom")
-ggsave("fig/epaa/epaa-all.pdf", height = 11, width = 8.5)
+ggsave("fig/epaa/epaa-all.png", height = 11, width = 8.5)
 
 
 p <- ggplot(data = df_group |> 

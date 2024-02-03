@@ -10,8 +10,8 @@ players <- readRDS("data/all-shots-players-w-fts.rds") |>
   dplyr::rename(player = namePlayer,
                 season = yearSeason)
 
-z_pp_df <- readRDS("data/players/z_pp_10_10_5_02112022.rds")
-w_pp_df <- readRDS("data/players/w_pp_10_10_5_02112022.rds")
+z_pp_df <- readRDS("data/players/z_pp_10_10_5_23102023.rds")
+w_pp_df <- readRDS("data/players/w_pp_10_10_5_23102023.rds")
 
 # z_pp_df <- readRDS("data/teams_a5_5_03Nov21/z_pp_5_5_20211102.rds")
 # w_pp_df <- readRDS("data/teams_a5_5_03Nov21/w_pp_5_5_20211102.rds")
