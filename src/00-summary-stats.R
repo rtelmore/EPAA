@@ -190,3 +190,5 @@ p + geom_point() +
        y = "Number of Shots Taken",
        col = "Region:") +
   scale_color_brewer(palette = "Paired")
+
+saveRDS(df_summary, "app/NBA-EPAA/summary-shots-for-app.rds")
