@@ -13,6 +13,8 @@ bayes_hier_mcmc <- function(df_shots, B = 10000, K = 7, n_z = 30, n_w = 30,
   require(tidyr)
   require(MCMCpack)
 
+  cat(sprintf("Starting the simuation at %s \n", Sys.time()))
+  
   ## Initialization
   set.seed(seed)
   alpha_init <- alpha
@@ -127,5 +129,10 @@ bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 30, n_w = 30, alpha 
 bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 30, n_w = 30, alpha = 5)
 bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 0.1)
 bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 10, n_w = 10, alpha = 5)
-# bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 0.1)
-# bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 5, n_w = 5, alpha = 5)
+
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 30, n_w = 10, alpha = 0.1)
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 30, n_w = 10, alpha = 5)
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 10, n_w = 30, alpha = 0.1)
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 10, n_w = 30, alpha = 5)
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 20, n_w = 20, alpha = 0.1)
+bayes_hier_mcmc(shots_data_players, B = 10000, K = 7, n_z = 20, n_w = 20, alpha = 5)
