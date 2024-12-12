@@ -3,25 +3,27 @@
 
 library(dplyr)
 
-df <- dplyr::bind_rows(readRDS("data/all-pts-above-avg-2013.rds") |> 
-                         dplyr::mutate(season = 2013),
-                       readRDS("data/all-pts-above-avg-2014.rds") |> 
-                         dplyr::mutate(season = 2014),
-                       readRDS("data/all-pts-above-avg-2015.rds") |> 
-                         dplyr::mutate(season = 2015),
-                       readRDS("data/all-pts-above-avg-2016.rds") |> 
-                         dplyr::mutate(season = 2016),
-                       readRDS("data/all-pts-above-avg-2017.rds") |> 
-                         dplyr::mutate(season = 2017),
-                       readRDS("data/all-pts-above-avg-2018.rds") |> 
-                         dplyr::mutate(season = 2018),
-                       readRDS("data/all-pts-above-avg-2019.rds") |> 
-                         dplyr::mutate(season = 2019),
-                       readRDS("data/all-pts-above-avg-2020.rds") |> 
-                         dplyr::mutate(season = 2020),
-                       readRDS("data/all-pts-above-avg-2021.rds") |> 
-                         dplyr::mutate(season = 2021))
-saveRDS(df, "app/NBA-EPAA/all-pts-above-avg-13-21.rds")
+df <- readRDS("data/all-pts-above-avg-20-20-5-10-21.rds") |>
+  dplyr::filter(season >= 2015)
+
+                       #   dplyr::mutate(season = 2013),
+                       # readRDS("data/all-pts-above-avg-2014.rds") |> 
+                       #   dplyr::mutate(season = 2014),
+                       # readRDS("data/all-pts-above-avg-2015.rds") |> 
+                       #   dplyr::mutate(season = 2015),
+                       # readRDS("data/all-pts-above-avg-2016.rds") |> 
+                       #   dplyr::mutate(season = 2016),
+                       # readRDS("data/all-pts-above-avg-2017.rds") |> 
+                       #   dplyr::mutate(season = 2017),
+                       # readRDS("data/all-pts-above-avg-2018.rds") |> 
+                       #   dplyr::mutate(season = 2018),
+                       # readRDS("data/all-pts-above-avg-2019.rds") |> 
+                       #   dplyr::mutate(season = 2019),
+                       # readRDS("data/all-pts-above-avg-2020.rds") |> 
+                       #   dplyr::mutate(season = 2020),
+                       # readRDS("data/all-pts-above-avg-2021.rds") |> 
+                       #   dplyr::mutate(season = 2021))
+saveRDS(df, "app/NBA-EPAA/all-pts-above-avg-15-21.rds")
 
 tmp <- df |> 
   dplyr::filter(season == 2021,

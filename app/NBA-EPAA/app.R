@@ -14,7 +14,7 @@ library(DT)
 library(ggplot2)
 library(cowplot)
 
-df <- readRDS("all-pts-above-avg-13-21.rds")
+df <- readRDS("all-pts-above-avg-15-21.rds")
 #df <- readRDS("app/NBA-apaa/all-pts-above-avg-18-21.rds")
 df_summary <- readRDS("summary-shots-for-app.rds")
 # Define UI for application that draws a histogram
@@ -37,7 +37,7 @@ ui <- dashboardPage(
                 box(
                   title = "Select Players and Season",
                   selectInput("selector_season", h4("Season"),
-                              choices = c(2013:2021), 
+                              choices = c(2015:2021), 
                               selected = "2021", width = '190px'),
                   selectInput("selector_p1", h4("Player One"),
                               choices = sort(unique(df$player)),
@@ -49,7 +49,7 @@ ui <- dashboardPage(
                               width = '190px'),
                   selectInput("selector_p3", h4("Player Three"),
                               choices = sort(unique(df$player)),
-                              selected = "Damian Lillard",
+                              selected = "Stephen Curry",
                               width = '190px'),
                   selectInput("selector_p4", h4("Player Four"),
                               choices = sort(unique(df$player)),
@@ -100,7 +100,7 @@ ui <- dashboardPage(
                               width = '190px'),
                   selectInput("selector_p7", h4("Player Three"),
                               choices = sort(unique(df$player)),
-                              selected = "Damian Lillard",
+                              selected = "Stephen Curry",
                               width = '190px'),
                   selectInput("selector_p8", h4("Player Four"),
                               choices = sort(unique(df$player)),
@@ -115,9 +115,9 @@ ui <- dashboardPage(
       tabItem(tabName = "about",
               h2("About this App"),
               "This app is an online supplement for Williams, Schliep, Fosdick, &
-              Elmore (2023). The app contains our points above average 
+              Elmore (2024). The app contains our points above average 
               summaries (densities and table) and raw data. In addition, we 
-              provide the raw data for each team's shots and make probabilities 
+              provide the data for each team's shots and make probabilities 
               by region. "
       )
     )
@@ -132,19 +132,11 @@ server <- function(input, output, session) {
     df |> dplyr::filter(season == input$selector_season)
   })
   
-  # observeEvent(players(), {
-  #   choices <- sort(unique(players()$player))
-  #   updateSelectInput(inputId = "selector_p1", choices = choices, selected = "LeBron James")
-  #   updateSelectInput(inputId = "selector_p2", choices = choices, selected = "James Harden")
-  #   updateSelectInput(inputId = "selector_p3", choices = choices, selected = "Damian Lillard")
-  #   updateSelectInput(inputId = "selector_p4", choices = choices, selected = "Russell Westbrook")
-  # })  
-  
   observeEvent(players(), {
     choices <- sort(unique(players()$player))
     updateSelectInput(inputId = "selector_p1", choices = choices, selected = "LeBron James")
     updateSelectInput(inputId = "selector_p2", choices = choices, selected = "James Harden")
-    updateSelectInput(inputId = "selector_p3", choices = choices, selected = "Damian Lillard")
+    updateSelectInput(inputId = "selector_p3", choices = choices, selected = "Stephen Curry")
     updateSelectInput(inputId = "selector_p4", choices = choices, selected = "Russell Westbrook")
   })  
   
@@ -187,7 +179,7 @@ server <- function(input, output, session) {
   df_rank_input <- reactive({
     df |> 
       dplyr::mutate(points = player_points - team_points,
-                    sample = rep(1:10000, times = 895)) |> 
+                    sample = rep(1:10000, times = 696)) |> 
       dplyr::filter(sample >= 3001) |> 
       dplyr::group_by(player, season) |> 
       dplyr::summarize(avg = mean(points), med = median(points)) |> 
@@ -222,7 +214,7 @@ server <- function(input, output, session) {
       geom_line() +
       labs(x = "Season", y = "Rank of Median EPAA per Game") +
       scale_color_brewer("", palette = "Paired") +
-      scale_x_continuous(breaks = 2013:2021, minor_breaks = NULL) +
+      scale_x_continuous(breaks = 2015:2021, minor_breaks = NULL) +
       scale_y_reverse(breaks = seq(0, 100, by = 5)) +
       #  geom_label() +
       theme_bw()
