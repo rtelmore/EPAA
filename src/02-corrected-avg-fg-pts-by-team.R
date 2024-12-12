@@ -39,14 +39,15 @@ teams <- df |>
 teams <- c(teams, "Average")
 
 set.seed(19892)
-alpha <- 0.1
-dimension <- 10
-string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
+alpha <- 5
+dimension_1 <- 20
+dimension_2 <- 20
+string <- paste(dimension_1, "_", dimension_2, "_", alpha, sep = "")
 #string
-w <- readRDS(paste("data/teams/w_pp_", string, "_22102023.rds", sep = ""))
-z <- readRDS(paste("data/teams/z_pp_", string, "_22102023.rds", sep = ""))
-p <- readRDS(paste("data/teams/p_", string, "_22102023.rds", sep = ""))
-q <- readRDS(paste("data/teams/q_", string, "_22102023.rds", sep = ""))
+w <- readRDS(paste("data/teams/w_pp_", string, "_09122024.rds", sep = ""))
+z <- readRDS(paste("data/teams/z_pp_", string, "_09122024.rds", sep = ""))
+p <- readRDS(paste("data/teams/p_", string, "_09122024.rds", sep = ""))
+q <- readRDS(paste("data/teams/q_", string, "_09122024.rds", sep = ""))
 
 N <- 8000 #shots
 K <- 7
@@ -98,29 +99,47 @@ results <- results |>
   dplyr::mutate(iter = rep(1:10000, times = 31)) |> 
   dplyr::filter(iter > 3000, team != "Average")
 
+results_10_30_0.1 <- results
+results_10_30_5 <- results
+results_30_10_0.1 <- results
+results_30_10_5 <- results
+results_20_20_0.1 <- results
+results_20_20_5 <- results
 results_30_30_5 <- results
 results_30_30_0.1 <- results
 results_10_10_5 <- results
 results_10_10_0.1 <- results
 
 df <- bind_rows(results_10_10_0.1 |> 
-                  dplyr::mutate(alpha = 0.1, dim = 10),
+                  dplyr::mutate(alpha = 0.1, dim1 = 10, dim2 = 10),
                 results_30_30_0.1 |> 
-                  dplyr::mutate(alpha = 0.1, dim = 30),
+                  dplyr::mutate(alpha = 0.1, dim1 = 30, dim2 = 30),
                 results_10_10_5 |> 
-                  dplyr::mutate(alpha = 5, dim = 10),
+                  dplyr::mutate(alpha = 5, dim1 = 10, dim2 = 10),
                 results_30_30_5 |> 
-                  dplyr::mutate(alpha = 5, dim = 30))
+                  dplyr::mutate(alpha = 5, dim1 = 30, dim2 = 30),
+                results_20_20_5 |> 
+                  dplyr::mutate(alpha = 5, dim1 = 20, dim2 = 20),
+                results_20_20_0.1 |> 
+                  dplyr::mutate(alpha = 0.1, dim1 = 20, dim2 = 20),
+                results_10_30_5 |> 
+                  dplyr::mutate(alpha = 5, dim1 = 10, dim2 = 30),
+                results_30_10_5 |> 
+                  dplyr::mutate(alpha = 5, dim1 = 30, dim2 = 10),
+                results_10_30_0.1 |> 
+                  dplyr::mutate(alpha = 0.1, dim1 = 10, dim2 = 30),
+                results_30_10_0.1 |> 
+                  dplyr::mutate(alpha = 0.1, dim1 = 30, dim2 = 10))
 saveRDS(df, "data/teams/epaa-all.rds")
 
 df <- readRDS("data/teams/epaa-all.rds") |> 
-  filter(dim == 10, alpha == 5, team != "Average") |> 
-  mutate(iter = rep(1:10000, times = 30)) |> 
+  filter(dim1 == 20, dim2 == 20, alpha == 5, team != "Average") |> 
+  mutate(iter = rep(1:10000, times = 21)) |> 
   filter(iter >= 3001)
 
-p_comp <- ggplot(data = df %>% 
-                   dplyr::mutate(., team = fct_reorder(team, points, 
-                                                       .fun = 'mean')),
+p_comp <- ggplot(data = df |> 
+                   dplyr::mutate(team = fct_reorder(team, points, 
+                                                    .fun = 'mean')),
                  aes(x = points/72, y = team))#, group = player, fill = player))
 #  scale_fill_viridis_d(option = "H", alpha = .75) +
 
@@ -131,7 +150,7 @@ p_comp + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   labs(y = "", 
        x = "expected points per game") +
   theme_light()
-ggsave("fig/epaa/epaa-10-10-5.png", height = 11, width = 8.5)
+ggsave("fig/epaa/epaa-20-20-5.png", height = 11, width = 8.5)
 
 ## ESS Calculation
 results <- data.frame(team = unique(df$team), 
@@ -142,11 +161,14 @@ for(i in 1:30){
     pull(points)
   results$ESS[i] <- coda::effectiveSize(tmp)
 }
-
+summary(results$ESS)
 ## supplement figure
 df <- readRDS("data/teams/epaa-all.rds")
+df <- df |> 
+  mutate(dim = paste0(dim1, ", ", dim2))
 p <- ggplot(data = df |> 
-              filter(team != "Average") |> 
+              filter(team != "Average", 
+                     dim1 == 30) |> 
               mutate(team = fct_reorder(team, points, .fun = 'mean'),
                      cat = paste("(", paste(dim, alpha, sep = ", "), ")", sep = "")),
             aes(x = team, 
@@ -159,11 +181,11 @@ p + geom_boxplot(position = position_dodge(width = .7),
   labs(x = "", 
        y = "expected points per game") +
   scale_y_continuous(breaks = seq(98, 128, by = 2)) +
-  scale_fill_brewer(palette = "Dark2") +
-  guides(fill = guide_legend(title = "(clusters, alpha):")) +
-  theme_light() +
+  scale_fill_brewer(palette = "Set2") +
+  guides(fill = guide_legend(title = "(J, L, alpha):")) +
+  theme_bw() +
   theme(legend.position = "bottom")
-ggsave("fig/epaa/epaa-all.png", height = 11, width = 8.5)
+ggsave("fig/epaa/epaa-all-30-accuracy.png", height = 11, width = 8.5)
 
 
 p <- ggplot(data = df_group |> 

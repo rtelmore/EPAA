@@ -17,23 +17,23 @@ shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |>
   na.omit()
 
 alpha <- 5
-dimension <- 10
+dimension <- 20
 K <- 7
 
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 
 ## Read in the w, z, p, and q data
-w <- readRDS("data/teams/w_pp_10_10_5_22102023.rds")
-z <- readRDS("data/teams/z_pp_10_10_5_22102023.rds")
-p <- readRDS("data/teams/p_10_10_5_22102023.rds")
-q <- readRDS("data/teams/q_10_10_5_22102023.rds")
+w <- readRDS("data/teams/w_pp_20_20_5_10122024.rds")
+z <- readRDS("data/teams/z_pp_20_20_5_10122024.rds")
+p <- readRDS("data/teams/p_20_20_5_10122024.rds")
+q <- readRDS("data/teams/q_20_20_5_10122024.rds")
 
-w_p <- readRDS("data/players/w_pp_10_10_5_23102023.rds")
-z_p <- readRDS("data/players/z_pp_10_10_5_23102023.rds")
-p_p <- readRDS("data/players/p_10_10_5_23102023.rds")
-q_p <- readRDS("data/players/q_10_10_5_23102023.rds")
+w_p <- readRDS("data/players/w_pp_20_20_5_08122024.rds")
+z_p <- readRDS("data/players/z_pp_20_20_5_08122024.rds")
+p_p <- readRDS("data/players/p_20_20_5_08122024.rds")
+q_p <- readRDS("data/players/q_20_20_5_08122024.rds")
 
-season_sim = 2021
+season_sim <- 2021
 
 df_teams <- df_tmp |> 
   dplyr::filter(season == season_sim) |> 
@@ -69,9 +69,9 @@ df <- dplyr::left_join(players_sub, df_player_team) |>
                 team_shots = round(8000*(1-prop))) |> 
   dplyr::ungroup()
 
-saveRDS(df, paste("data/all-avg-pts-above-data-", season_sim, ".rds", sep = ""))
+saveRDS(df, paste("data/all-avg-pts-above-data-20-20-5-", season_sim, ".rds", sep = ""))
 
-df <- readRDS(paste("data/all-avg-pts-above-data-", season_sim, ".rds", sep = "")) |> 
+df <- readRDS(paste("data/all-avg-pts-above-data-20-20-5-", season_sim, ".rds", sep = "")) |> 
   dplyr::filter(player != "Enes Kanter")
 
 teams_data <- df_tmp |> 
@@ -136,10 +136,10 @@ for(i in seq_along(df$player)){
   
 }
 
-saveRDS(results, paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
+saveRDS(results, paste("data/all-pts-above-avg-", season_sim, "-20-20-5.rds", sep = ""))
 
 season_sim <- 2021
-results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
+results <- readRDS(paste("data/all-pts-above-avg-20-20-5-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
@@ -164,7 +164,7 @@ p + geom_histogram() +
   labs(x = "Effective Sample Size") +
   theme_bw()
 
-ggsave("fig/players/ess-top-100.png", hei = 6, width = 8)
+ggsave("fig/players/ess-top-100-revision-2.png", hei = 6, width = 8)
 p <- ggplot(data = df %>% 
                    dplyr::mutate(., player = fct_reorder(player, points, 
                                                        .fun = 'mean')),
@@ -191,7 +191,7 @@ p <- ggplot(data = df |>
 p + stat_density_ridges(scale = 1.1, quantiles = .5, quantile_lines = F) +
   scale_fill_viridis_d(option = "H", alpha = .75) +
   scale_y_discrete(expand = c(0, 0)) +
-  scale_x_continuous(breaks = seq(-8, 8, by = 2), limits = c(-8, 8)) +
+  scale_x_continuous(breaks = seq(-8, 10, by = 2), limits = c(-8, 10)) +
   geom_vline(xintercept = 0, linetype = 3) +
   guides(fill = "none") +
   labs(y = "", 
@@ -204,7 +204,7 @@ p <- ggplot(data = df |>
                                                  .fun = 'mean')),
             aes(x = points/72, y = player))#, group = player, fill = player))
 p + geom_boxplot() +
-  scale_x_continuous(breaks = seq(-8, 8, by = 2), limits = c(-8, 8)) +
+  scale_x_continuous(breaks = seq(-8, 10, by = 2), limits = c(-8, 10)) +
   geom_vline(xintercept = 0, linetype = 3) +
   labs(y = "", 
        x = "expected points per game above average") +
@@ -233,13 +233,13 @@ p + geom_boxplot(stat = "identity") +
   theme_light() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-results <- readRDS("data/all-pts-above-avg-2021.rds")
+results <- readRDS("data/all-pts-above-avg-2021-20-20-5.rds")
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
   dplyr::filter(sample >= 3001)
 
-df_props <- readRDS("data/all-avg-pts-above-data-2021.rds") 
+df_props <- readRDS("data/all-avg-pts-above-data-2021-20-20-5.rds") 
 df_agg <- df |> 
   dplyr::group_by(player) |> 
   dplyr::summarize(m = mean(points)/72)
@@ -249,7 +249,7 @@ df_comb <- dplyr::left_join(df_props, df_agg) |>
 
 p <- ggplot(df_comb, aes(y = m, x = prop, label = new_player))
 p + geom_point() +
-  scale_y_continuous(breaks = seq(-4, 2, by = 1), limits = c(-4, 2.1)) +
+  scale_y_continuous(breaks = seq(-4, 4, by = 1), limits = c(-4, 4)) +
   scale_x_continuous(breaks = seq(.06, .32, by = .02)) +
   geom_text_repel(min.segment.length = 0) +
   geom_hline(yintercept = 0, linetype = 3) +
@@ -258,7 +258,7 @@ p + geom_point() +
   theme_bw()
 
 ## Steph Curry, Russell Westbrook, Chris Paul, and Damian Lillard
-df <- readRDS("data/all-pts-above-avg-10-21.rds") |> 
+df <- readRDS("data/all-pts-above-avg-20-20-5-10-21.rds") |> 
   dplyr::filter(player %in% c("Stephen Curry", "Russell Westbrook", "James Harden",
                               "Damian Lillard")) |> 
   dplyr::mutate(points = player_points - team_points,
@@ -278,7 +278,7 @@ p_box + geom_hline(yintercept = 0, linetype = "dashed") +
   theme_bw()
 
 ## Ranked pts above avg
-df <- readRDS("data/all-pts-above-avg-10-21.rds") |> 
+df <- readRDS("data/all-pts-above-avg-20-20-5-10-21.rds") |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 1195)) |> 
   dplyr::filter(sample >= 3001)
@@ -305,4 +305,4 @@ p_ranks + geom_point() +
   scale_y_reverse(breaks = seq(0, 100, by = 5)) +
   theme_bw()
 
-ggsave("fig/epaa-player-ranks.png", hei = 8, wid = 11.5)
+ggsave("fig/epaa-player-ranks-revision-2.png", hei = 8, wid = 11.5)

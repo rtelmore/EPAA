@@ -17,33 +17,33 @@ shots_data_players <- readRDS("data/all-shots-players-w-fts.rds") |>
   na.omit()
 
 alpha <- 5
-dimension <- 30
+dimension <- 20
 K <- 7
 
 string <- paste(dimension, "_", dimension, "_", alpha, sep = "")
 string
 ## Read in the w, z, p, and q data
-w <- readRDS("data/teams/w_pp_30_30_5_21102023.rds")
-z <- readRDS("data/teams/z_pp_30_30_5_21102023.rds")
-p <- readRDS("data/teams/p_30_30_5_21102023.rds")
-q <- readRDS("data/teams/q_30_30_5_21102023.rds")
+w <- readRDS("data/teams/w_pp_20_20_0.1_09122024.rds")
+z <- readRDS("data/teams/z_pp_20_20_0.1_09122024.rds")
+p <- readRDS("data/teams/p_20_20_0.1_09122024.rds")
+q <- readRDS("data/teams/q_20_20_0.1_09122024.rds")
 
-w_p <- readRDS("data/players/w_pp_30_30_5_23102023.rds")
-z_p <- readRDS("data/players/z_pp_30_30_5_23102023.rds")
-p_p <- readRDS("data/players/p_30_30_5_23102023.rds")
-q_p <- readRDS("data/players/q_30_30_5_23102023.rds")
+w_p <- readRDS("data/players/w_pp_20_20_0.1_08122024.rds")
+z_p <- readRDS("data/players/z_pp_20_20_0.1_08122024.rds")
+p_p <- readRDS("data/players/p_20_20_0.1_08122024.rds")
+q_p <- readRDS("data/players/q_20_20_0.1_08122024.rds")
 
 players <- readRDS("data/all-shots-players-w-fts.rds") |> 
   dplyr::rename(player = namePlayer,
                 season = yearSeason)
 
+#seasons <- 2010:2021
 seasons <- 2021
-season_sim <- 2021
 for (i in seq_along(seasons)){
   
   season_sim <- seasons[i]
   
-  cat(sprintf("Season %s at %s \n\n", df$player[i], Sys.time()))
+  cat(sprintf("\n\n Season %s at %s \n\n", season_sim, Sys.time()))
   
   df_teams <- df_tmp |> 
     dplyr::filter(season == season_sim) |> 
@@ -144,37 +144,37 @@ for (i in seq_along(seasons)){
     
   }
   
-  saveRDS(results, paste("data/all-pts-above-avg-30-30-5-", season_sim, ".rds", sep = ""))
+  saveRDS(results, paste("data/all-pts-above-avg-20-20-0.1-", season_sim, ".rds", sep = ""))
   
 }
 
-df <- dplyr::bind_rows(readRDS("data/all-pts-above-avg-2010.rds") |>
+df <- dplyr::bind_rows(readRDS("data/all-pts-above-avg-20-20-5-2010.rds") |>
                          dplyr::mutate(season = 2010),
-                       readRDS("data/all-pts-above-avg-2011.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2011.rds") |>
                          dplyr::mutate(season = 2011),
-                       readRDS("data/all-pts-above-avg-2012.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2012.rds") |>
                          dplyr::mutate(season = 2012),
-                       readRDS("data/all-pts-above-avg-2013.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2013.rds") |>
                          dplyr::mutate(season = 2013),
-                       readRDS("data/all-pts-above-avg-2014.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2014.rds") |>
                          dplyr::mutate(season = 2014),
-                       readRDS("data/all-pts-above-avg-2015.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2015.rds") |>
                          dplyr::mutate(season = 2015),
-                       readRDS("data/all-pts-above-avg-2016.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2016.rds") |>
                          dplyr::mutate(season = 2016),
-                       readRDS("data/all-pts-above-avg-2017.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2017.rds") |>
                          dplyr::mutate(season = 2017),
-                       readRDS("data/all-pts-above-avg-2018.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2018.rds") |>
                          dplyr::mutate(season = 2018),
-                       readRDS("data/all-pts-above-avg-2019.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2019.rds") |>
                          dplyr::mutate(season = 2019),
-                       readRDS("data/all-pts-above-avg-2020.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2020.rds") |>
                          dplyr::mutate(season = 2020),
-                       readRDS("data/all-pts-above-avg-2021.rds") |>
+                       readRDS("data/all-pts-above-avg-20-20-5-2021.rds") |>
                          dplyr::mutate(season = 2021))
-saveRDS(df, "data/all-pts-above-avg-10-21.rds")
+saveRDS(df, "data/all-pts-above-avg-20-20-5-10-21.rds")
 
-results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
+results <- readRDS(paste("data/all-pts-above-avg-20-20-5-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
@@ -219,7 +219,7 @@ p <- ggplot(data = df |>
                                                  .fun = 'mean')),
             aes(x = points/72, y = player))#, group = player, fill = player))
 p + geom_boxplot() +
-  scale_x_continuous(breaks = seq(-8, 8, by = 2), limits = c(-8, 8)) +
+  scale_x_continuous(breaks = seq(-8, 9, by = 2), limits = c(-8, 9)) +
   geom_vline(xintercept = 0, linetype = 3) +
   labs(y = "", 
        x = "expected points per game above average") +
@@ -248,13 +248,13 @@ p + geom_boxplot(stat = "identity") +
   theme_light() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 
-results <- readRDS(paste("data/all-pts-above-avg-", season_sim, ".rds", sep = ""))
+results <- readRDS(paste("data/all-pts-above-avg-20-20-5-", season_sim, ".rds", sep = ""))
 df <- results |> 
   dplyr::mutate(points = player_points - team_points,
                 sample = rep(1:10000, times = 100)) |> 
   dplyr::filter(sample >= 3001)
 
-df_props <- readRDS("data/all-avg-pts-above-data-2021.rds") 
+df_props <- readRDS("data/all-avg-pts-above-data-20-20-5-2021.rds") 
 df_agg <- df |> 
   dplyr::group_by(player) |> 
   dplyr::summarize(m = mean(points)/72,
@@ -265,7 +265,7 @@ df_comb <- dplyr::left_join(df_props, df_agg) |>
 
 p <- ggplot(df_comb, aes(y = m, x = prop, label = new_player))
 p + geom_point(aes(size = `standard deviation:`)) +
-  scale_y_continuous(breaks = seq(-4, 3, by = 1), limits = c(-4, 3)) +
+  scale_y_continuous(breaks = seq(-3, 4, by = 1), limits = c(-3, 4)) +
   scale_x_continuous(breaks = seq(.06, .32, by = .02)) +
   geom_text_repel() +
   geom_hline(yintercept = 0, linetype = 3) +
@@ -274,5 +274,5 @@ p + geom_point(aes(size = `standard deviation:`)) +
   theme_light() +
   theme(legend.position = "bottom")
 
-ggsave("fig/fg_pts_above_avg_by_prop_shots.png", hei = 8, wid = 12)
+ggsave("fig/fg_pts_above_avg_by_prop_shots_revision_2.png", hei = 8, wid = 12)
 
