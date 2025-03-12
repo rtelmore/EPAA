@@ -10,16 +10,14 @@ players <- readRDS("data/all-shots-players-w-fts.rds") |>
   dplyr::rename(player = namePlayer,
                 season = yearSeason)
 
-z_pp_df <- readRDS("data/players/z_pp_10_10_5_23102023.rds")
-w_pp_df <- readRDS("data/players/w_pp_10_10_5_23102023.rds")
+z_pp_df <- readRDS("../EPAA/data/players/z_pp_20_20_5_08122024.rds")
+w_pp_df <- readRDS("../EPAA/data/players/w_pp_20_20_5_08122024.rds")
 
-# z_pp_df <- readRDS("data/teams_a5_5_03Nov21/z_pp_5_5_20211102.rds")
-# w_pp_df <- readRDS("data/teams_a5_5_03Nov21/w_pp_5_5_20211102.rds")
 
 ## Look at select players
 ind_players <- c("Chris Paul", "LeBron James", "James Harden", "Kevin Durant",
                  "Russell Westbrook", "Stephen Curry", "Nikola Jokic", 
-                 "Giannis Antetokounmpo")
+                 "Giannis Antetokounmpo", "Rudy Gobert", "Zion Williamson")
 players_sub <- players |> 
   dplyr::filter(player %in% ind_players,
                 season >= 2010)
@@ -50,5 +48,5 @@ for(s in seq_along(seasons)){
       } else results <- tmp
     }
   }
-  saveRDS(results, paste("data/players/posterior-clusters-10-10-5-", seasons[s], ".rds", sep = ""))
+  saveRDS(results, paste("data/players/posterior-clusters-20-20-5-", seasons[s], ".rds", sep = ""))
 }
