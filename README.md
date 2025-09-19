@@ -1,7 +1,7 @@
 # Expected Points Above Average
 
 This is the public repository for the paper by Williams, Schliep, Fosdick, and
-Elmore (2023+) on shooting in the NBA.
+Elmore (2025) on shooting in the NBA.
 
 ## Abstract
 Team and player evaluation in professional sport is extremely important given 
